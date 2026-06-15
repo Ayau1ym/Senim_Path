@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SenimPath — безопасные маршруты для детей и студентов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#0B1E33;
+    --navy-700:#163A5C;
+    --navy-600:#1F4E73;
+    --teal-500:#2BB6A3;
+    --teal-100:#DDF2EE;
+    --amber-500:#F3A53B;
+    --amber-100:#FCEBD2;
+    --coral-500:#E5594C;
+    --coral-100:#FBE0DC;
+    --paper-50:#F3F6F5;
+    --paper-0:#FFFFFF;
+    --ink-900:#0F2233;
+    --ink-600:#4C6273;
+    --line:#DCE6E3;
+    --radius:14px;
+    --shadow:0 18px 40px -22px rgba(11,30,51,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    color:var(--ink-900);
+    background:var(--paper-50);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0;
+    line-height:1.15;
+    letter-spacing:-0.01em;
+  }
+  p{margin:0;}
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .container{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- Waypoint label (signature detail) ---------- */
+  .waypoint{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--teal-500);
+  }
+  .waypoint::before{
+    content:"";
+    width:34px;height:1px;
+    background:var(--teal-500);
+    display:block;
+  }
+  .waypoint.on-dark{color:#7FE0CF;}
+  .waypoint.on-dark::before{background:#7FE0CF;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 26px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:15px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+    font-family:'Inter',sans-serif;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{
+    background:var(--teal-500);
+    color:var(--navy-900);
+  }
+  .btn-primary:hover{box-shadow:0 10px 24px -10px rgba(43,182,163,0.6); transform:translateY(-1px);}
+  .btn-ghost{
+    background:transparent;
+    border-color:rgba(255,255,255,0.35);
+    color:#fff;
+  }
+  .btn-ghost.dark-ctx{border-color:rgba(15,34,51,0.25); color:var(--ink-900);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.08);}
+  .btn-ghost.dark-ctx:hover{background:rgba(15,34,51,0.05);}
+  .btn-small{padding:9px 18px; font-size:13.5px; border-radius:999px; border:1.5px solid var(--line); background:#fff; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;}
+  .btn-small.active{background:var(--navy-900); color:#fff; border-color:var(--navy-900);}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,30,51,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 0;
+    color:#fff;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:19px;
+    letter-spacing:-0.01em;
+  }
+  .logo svg{flex-shrink:0;}
+  .nav-links{
+    display:flex; align-items:center; gap:30px;
+    font-size:14.5px; font-weight:500;
+  }
+  .nav-links a{opacity:.82; transition:opacity .15s;}
+  .nav-links a:hover{opacity:1;}
+  .nav-cta{display:flex; align-items:center; gap:14px;}
+  .nav-toggle{display:none; background:none; border:none; color:#fff; cursor:pointer; padding:6px;}
+
+  @media (max-width:880px){
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--navy-900);
+      flex-direction:column; align-items:flex-start;
+      padding:18px 28px 26px; gap:16px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      display:none;
+    }
+    .nav-links.open{display:flex;}
+    .nav-toggle{display:block;}
+    .nav-cta .btn-primary{display:none;}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:var(--navy-900);
+    color:#fff;
+    padding:74px 0 90px;
+    position:relative;
+    overflow:hidden;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 1.6px);
+    background-size:34px 34px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 1fr;
+    gap:60px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--teal-500);
+    background:rgba(43,182,163,0.12);
+    border:1px solid rgba(43,182,163,0.3);
+    padding:7px 14px; border-radius:999px;
+    margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(36px, 5.2vw, 60px);
+    font-weight:700;
+    margin-bottom:22px;
+  }
+  .hero h1 span{color:var(--teal-500);}
+  .hero p.lead{
+    font-size:17.5px;
+    color:rgba(255,255,255,0.72);
+    max-width:520px;
+    margin-bottom:34px;
+  }
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:46px;}
+
+  .data-strip{
+    overflow:hidden;
+    border-top:1px solid rgba(255,255,255,0.1);
+    padding-top:24px;
+  }
+  .data-strip-track{
+    display:flex; gap:14px;
+    width:max-content;
+    animation:scrollTrack 32s linear infinite;
+  }
+  .data-chip{
+    display:flex; align-items:center; gap:9px;
+    font-size:13px; font-family:'JetBrains Mono',monospace;
+    color:rgba(255,255,255,0.6);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:999px; padding:8px 16px;
+    white-space:nowrap;
+  }
+  .data-chip svg{flex-shrink:0;}
+  @keyframes scrollTrack{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+
+  /* hero map */
+  .map-card{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px;
+    padding:18px;
+  }
+  .map-card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.1em;
+    color:rgba(255,255,255,0.55); text-transform:uppercase;
+    padding:4px 8px 14px;
+  }
+  .map-card-head .dot{display:inline-flex; gap:6px; align-items:center;}
+  .map-card-head .dot span{width:7px;height:7px;border-radius:50%;background:var(--teal-500); display:inline-block; animation:pulseDot 1.8s ease-in-out infinite;}
+  @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  svg.route-map{width:100%; height:auto; display:block;}
+  .blocks rect{fill:rgba(255,255,255,0.045);}
+  .route-line{
+    fill:none; stroke-width:5; stroke-linecap:round; stroke-linejoin:round;
+    transition:opacity .4s ease;
+  }
+  .route-line.fast{stroke:var(--coral-500); stroke-dasharray:10 10;}
+  .route-line.safe{stroke:var(--teal-500);}
+  .route-line.hidden-route{opacity:0;}
+  .marker-lamp circle{fill:var(--amber-500); animation:glow 2.4s ease-in-out infinite;}
+  .marker-cam rect{fill:#9FB8C9;}
+  .marker-incident path{fill:var(--coral-500);}
+  @keyframes glow{0%,100%{opacity:1; r:4;}50%{opacity:.45; r:5.5;}}
+  .pin text{font-family:'JetBrains Mono',monospace; font-size:11px; fill:rgba(255,255,255,0.7);}
+  .pin circle{fill:#fff;}
+  .pin.a circle{fill:var(--teal-500);}
+  .pin.b circle{fill:var(--amber-500);}
+
+  .map-legend{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:12.5px; color:rgba(255,255,255,0.6);
+    padding:14px 8px 2px;
+  }
+  .map-legend span{display:inline-flex; align-items:center; gap:7px;}
+  .legend-swatch{width:16px; height:4px; border-radius:2px; display:inline-block;}
+
+  /* ---------- Sections ---------- */
+  section{padding:96px 0;}
+  .section-head{max-width:680px; margin-bottom:54px;}
+  .section-head h2{font-size:clamp(28px,3.6vw,42px); font-weight:700; margin-bottom:16px;}
+  .section-head p{color:var(--ink-600); font-size:16.5px;}
+  .on-dark .section-head h2, .on-dark .section-head p{color:#fff;}
+  .on-dark .section-head p{color:rgba(255,255,255,0.65);}
+
+  /* ---------- Problem section ---------- */
+  .problem{background:var(--navy-900); color:#fff;}
+  .problem-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:60px;
+    align-items:start;
+  }
+  .problem-copy p{color:rgba(255,255,255,0.7); font-size:16px; margin-bottom:18px;}
+  .problem-copy p strong{color:#fff;}
+  .source-list{display:flex; flex-direction:column; gap:14px; margin-top:28px;}
+  .source-item{
+    display:flex; gap:14px; align-items:flex-start;
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px; padding:14px 16px;
+    background:rgba(255,255,255,0.03);
+  }
+  .source-item svg{flex-shrink:0; margin-top:2px;}
+  .source-item h4{font-size:14.5px; font-weight:600; margin-bottom:4px;}
+  .source-item p{font-size:13.5px; color:rgba(255,255,255,0.55); margin:0;}
+
+  .demo-panel{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:18px; padding:26px;
+  }
+  .demo-panel .label{font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.12em; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:18px;}
+  .demo-row{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-top:1px solid rgba(255,255,255,0.08);}
+  .demo-row:first-of-type{border-top:none;}
+  .demo-row .name{font-size:14.5px;}
+  .demo-row .bar-wrap{flex:1; max-width:55%; margin:0 16px;}
+  .bar-track{height:6px; background:rgba(255,255,255,0.08); border-radius:6px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:6px;}
+  .bar-fill.green{background:var(--teal-500);}
+  .bar-fill.amber{background:var(--amber-500);}
+  .bar-fill.coral{background:var(--coral-500);}
+  .demo-row .val{font-family:'JetBrains Mono',monospace; font-size:13px; color:rgba(255,255,255,0.65); width:42px; text-align:right;}
+  .demo-foot{font-size:12.5px; color:rgba(255,255,255,0.4); margin-top:16px;}
+
+  /* ---------- How it works ---------- */
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:22px;
+    counter-reset:step;
+  }
+  .step-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 22px;
+    position:relative;
+  }
+  .step-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px; color:var(--teal-500);
+    margin-bottom:18px; letter-spacing:.1em;
+  }
+  .step-card h3{font-size:18px; margin-bottom:10px;}
+  .step-card p{font-size:14.5px; color:var(--ink-600);}
+  .step-card svg{margin-bottom:16px;}
+
+  /* ---------- Map demo section ---------- */
+  .map-demo{background:#fff;}
+  .map-demo-top{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:34px;}
+  .map-controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+  .route-form{
+    display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+    background:var(--paper-0); border:1px solid var(--line); border-radius:14px; padding:14px 18px;
+  }
+  .route-form .field{display:flex; flex-direction:column; gap:3px; min-width:150px;}
+  .route-form label{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-600); font-family:'JetBrains Mono',monospace;}
+  .route-form input{
+    border:none; border-bottom:1.5px solid var(--line); padding:6px 2px; font-size:15px;
+    font-family:'Inter',sans-serif; background:transparent; color:var(--ink-900); outline:none;
+    transition:border-color .15s;
+  }
+  .route-form input:focus{border-color:var(--teal-500);}
+  .toggle-group{display:flex; gap:8px; border:1px solid var(--line); border-radius:999px; padding:4px; background:var(--paper-50);}
+
+  .map-wrap{
+    display:grid; grid-template-columns:1.4fr 1fr; gap:26px; align-items:start;
+  }
+  .map-frame{
+    background:var(--navy-900); border-radius:20px; padding:20px;
+  }
+  .map-frame .route-line.safe{stroke:var(--teal-500);}
+  .map-frame .route-line.fast{stroke:var(--coral-500);}
+  .map-frame .blocks rect{fill:rgba(255,255,255,0.045); cursor:default;}
+  .map-frame .marker{cursor:pointer;}
+  .map-frame .marker circle, .map-frame .marker rect, .map-frame .marker path{transition:transform .15s;}
+  .map-frame .marker:hover circle, .map-frame .marker:hover rect{filter:brightness(1.3);}
+
+  .info-panel{
+    border:1px solid var(--line); border-radius:16px; padding:22px;
+    display:flex; flex-direction:column; gap:16px;
+    background:var(--paper-0);
+    min-height:340px;
+  }
+  .info-panel h4{font-size:13px; text-transform:uppercase; letter-spacing:.1em; font-family:'JetBrains Mono',monospace; color:var(--ink-600);}
+  .info-card{
+    border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .info-card svg{flex-shrink:0; margin-top:2px;}
+  .info-card .t{font-weight:600; font-size:14.5px; margin-bottom:3px;}
+  .info-card .d{font-size:13px; color:var(--ink-600);}
+  .info-empty{
+    flex:1; display:flex; align-items:center; justify-content:center; text-align:center;
+    color:var(--ink-600); font-size:14px; padding:20px; border:1px dashed var(--line); border-radius:12px;
+  }
+
+  /* ---------- Analytics ---------- */
+  .analytics{background:var(--paper-50);}
+  .analytics-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .stat-card{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px;
+  }
+  .stat-card .num{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px;
+    color:var(--navy-900); transition:color .3s;
+  }
+  .stat-card.active-good .num{color:var(--teal-500);}
+  .stat-card .label{font-size:13.5px; color:var(--ink-600); margin-top:6px;}
+  .compare-card{grid-column:span 4; background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:26px;}
+  .compare-row{display:flex; align-items:center; gap:16px; margin-bottom:16px;}
+  .compare-row:last-child{margin-bottom:0;}
+  .compare-row .ctitle{width:170px; font-size:14.5px; font-weight:600;}
+  .compare-row .ctrack{flex:1; height:10px; background:var(--paper-50); border-radius:6px; overflow:hidden;}
+  .compare-row .cfill{height:100%; border-radius:6px; transition:width .6s ease;}
+  .compare-row .cfill.fast{background:var(--coral-500);}
+  .compare-row .cfill.safe{background:var(--teal-500);}
+  .compare-row .cval{width:70px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:13.5px; color:var(--ink-600);}
+
+  @media (max-width:900px){
+    .analytics-grid{grid-template-columns:repeat(2,1fr);}
+    .compare-card{grid-column:span 2;}
+  }
+
+  /* ---------- Features ---------- */
+  .features{background:#fff;}
+  .features-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .feature-card{
+    border:1px solid var(--line); border-radius:var(--radius); padding:24px;
+    transition:border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .feature-card:hover{border-color:var(--teal-500); box-shadow:var(--shadow); transform:translateY(-3px);}
+  .feature-card .icon-box{
+    width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:var(--teal-100); margin-bottom:18px;
+  }
+  .feature-card h4{font-size:16px; margin-bottom:8px;}
+  .feature-card p{font-size:13.5px; color:var(--ink-600);}
+  @media (max-width:1000px){.features-grid{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---------- Report section ---------- */
+  .report{background:var(--teal-100);}
+  .report-grid{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;}
+  .report-form{
+    background:#fff; border-radius:18px; padding:30px; border:1px solid var(--line);
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .report-form .field{display:flex; flex-direction:column; gap:6px;}
+  .report-form label{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-600); font-family:'JetBrains Mono',monospace;}
+  .report-form select, .report-form textarea, .report-form input{
+    border:1.5px solid var(--line); border-radius:10px; padding:11px 13px; font-size:14.5px;
+    font-family:'Inter',sans-serif; color:var(--ink-900); outline:none; resize:vertical;
+    transition:border-color .15s;
+  }
+  .report-form select:focus, .report-form textarea:focus, .report-form input:focus{border-color:var(--teal-500);}
+  .attach-btn{
+    display:inline-flex; align-items:center; gap:8px; align-self:flex-start;
+    border:1.5px dashed var(--line); border-radius:10px; padding:10px 16px; font-size:13.5px;
+    background:transparent; cursor:pointer; color:var(--ink-600); font-family:'Inter',sans-serif;
+  }
+  .attach-btn:hover{border-color:var(--teal-500); color:var(--ink-900);}
+  .report-copy h2{margin-bottom:16px;}
+  .report-copy p{color:var(--ink-600); font-size:16px; margin-bottom:20px;}
+  .report-points{display:flex; flex-direction:column; gap:14px;}
+  .report-point{display:flex; gap:12px; align-items:flex-start; font-size:14.5px;}
+  .report-point svg{flex-shrink:0; margin-top:3px;}
+
+  @media (max-width:900px){.report-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translate(-50%,140%);
+    background:var(--navy-900); color:#fff; padding:14px 24px; border-radius:12px;
+    font-size:14.5px; display:flex; align-items:center; gap:10px; z-index:100;
+    box-shadow:0 14px 34px -10px rgba(0,0,0,.4);
+    transition:transform .35s ease;
+  }
+  .toast.show{transform:translate(-50%,0);}
+  .toast svg{flex-shrink:0;}
+
+  /* ---------- City dashboard ---------- */
+  .city{background:var(--navy-900); color:#fff;}
+  .city-grid{display:grid; grid-template-columns:1.2fr 1fr; gap:50px; align-items:start;}
+  .heatmap-card{background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:18px; padding:22px;}
+  .heatmap-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,0.5); text-transform:uppercase;}
+  .heatmap{display:grid; grid-template-columns:repeat(10,1fr); gap:5px;}
+  .heatmap .cell{aspect-ratio:1; border-radius:4px; cursor:pointer; transition:transform .12s;}
+  .heatmap .cell:hover{transform:scale(1.18); z-index:2;}
+  .heatmap-legend{display:flex; gap:18px; margin-top:16px; font-size:12.5px; color:rgba(255,255,255,0.55);}
+  .heatmap-legend span{display:flex; align-items:center; gap:7px;}
+  .heatmap-legend i{width:14px; height:14px; border-radius:3px; display:inline-block;}
+  .heatmap-note{margin-top:14px; font-size:13px; color:rgba(255,255,255,0.5); min-height:20px;}
+
+  .reco-list{display:flex; flex-direction:column; gap:14px;}
+  .reco-item{
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px 18px;
+    background:rgba(255,255,255,0.03);
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .reco-item .tag{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    background:rgba(43,182,163,0.15); color:var(--teal-500); border-radius:999px; padding:4px 10px;
+    flex-shrink:0; margin-top:2px;
+  }
+  .reco-item p{font-size:14px; color:rgba(255,255,255,0.78);}
+  .city-stats{display:flex; gap:22px; margin-top:24px; flex-wrap:wrap;}
+  .city-stat .num{font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; color:var(--teal-500);}
+  .city-stat .label{font-size:12.5px; color:rgba(255,255,255,0.55); margin-top:2px;}
+
+  @media (max-width:900px){.city-grid{grid-template-columns:1fr;} .heatmap{grid-template-columns:repeat(10,1fr);}}
+
+  /* ---------- Roadmap ---------- */
+  .roadmap{background:var(--paper-50);}
+  .roadmap-track{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative;
+  }
+  .roadmap-track::before{
+    content:""; position:absolute; top:13px; left:0; right:0; height:2px;
+    background:var(--line); z-index:0;
+  }
+  .roadmap-item{position:relative; z-index:1; padding-right:24px;}
+  .roadmap-dot{
+    width:26px; height:26px; border-radius:50%; background:#fff; border:2px solid var(--teal-500);
+    display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:var(--teal-500);
+  }
+  .roadmap-item h4{font-size:16px; margin-bottom:8px;}
+  .roadmap-item p{font-size:13.5px; color:var(--ink-600);}
+  @media (max-width:900px){
+    .roadmap-track{grid-template-columns:1fr; gap:30px;}
+    .roadmap-track::before{display:none;}
+  }
+
+  .impact-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:54px;}
+  .impact-card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:28px;}
+  .impact-card .tag{font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal-500); margin-bottom:12px; display:block;}
+  .impact-card h3{font-size:19px; margin-bottom:10px;}
+  .impact-card p{font-size:14.5px; color:var(--ink-600);}
+  @media (max-width:900px){.impact-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    background:linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 100%);
+    color:#fff; text-align:center; padding:100px 0;
+    position:relative; overflow:hidden;
+  }
+  .final-cta::before{
+    content:""; position:absolute; inset:0;
+    background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 1.6px);
+    background-size:34px 34px;
+  }
+  .final-cta-inner{position:relative; z-index:1;}
+  .final-cta h2{font-size:clamp(28px,4.4vw,46px); margin-bottom:18px;}
+  .final-cta p{color:rgba(255,255,255,0.7); font-size:17px; max-width:560px; margin:0 auto 32px;}
+  .final-cta .hero-actions{justify-content:center;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--navy-900); color:rgba(255,255,255,0.6); padding:50px 0 30px; border-top:1px solid rgba(255,255,255,0.06);}
+  .footer-grid{display:flex; justify-content:space-between; flex-wrap:wrap; gap:40px; padding-bottom:36px;}
+  .footer-brand .logo{color:#fff; margin-bottom:14px;}
+  .footer-brand p{font-size:13.5px; max-width:280px;}
+  .footer-cols{display:flex; gap:60px;}
+  .footer-col h5{font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:14px;}
+  .footer-col a{display:block; font-size:14px; margin-bottom:10px; color:rgba(255,255,255,0.65); transition:color .15s;}
+  .footer-col a:hover{color:#fff;}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,0.08); padding-top:24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12.5px;}
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid rgba(255,255,255,0.15); border-radius:999px; padding:6px 14px;
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.08em;
+  }
+
+  /* ---------- Reveal animation ---------- */
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .problem-grid, .map-wrap, .report-grid, .city-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .analytics-grid{grid-template-columns:repeat(2,1fr);}
+    .compare-card{grid-column:span 2;}
+  }
+  @media (max-width:620px){
+    section{padding:64px 0;}
+    .steps{grid-template-columns:1fr;}
+    .features-grid{grid-template-columns:1fr;}
+    .analytics-grid{grid-template-columns:1fr;}
+    .compare-card{grid-column:span 1;}
+    .footer-cols{gap:30px;}
+    .compare-row{flex-wrap:wrap;}
+    .compare-row .ctrack{order:3; width:100%; flex-basis:100%;}
+    .route-form{width:100%;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="container nav">
+    <a href="#top" class="logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="13" stroke="#2BB6A3" stroke-width="2"/>
+        <path d="M8 18L12 11L16 15L20 8" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="20" cy="8" r="2" fill="#2BB6A3"/>
+      </svg>
+      SenimPath
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#problem">Проблема</a>
+      <a href="#how">Как это работает</a>
+      <a href="#map">Карта</a>
+      <a href="#features">Возможности</a>
+      <a href="#city">Для города</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="#map" class="btn btn-primary">Открыть карту</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Меню">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6H21M3 12H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">SIA Kazakhstan · Конкурс социальных проектов</div>
+      <h1>Безопасность <span>важнее</span> скорости</h1>
+      <p class="lead">SenimPath строит для школьников и студентов не самый короткий путь домой, а самый безопасный — с учётом освещения улиц, реальных происшествий, состояния тротуаров и сигналов от самих жителей города.</p>
+      <div class="hero-actions">
+        <a href="#map" class="btn btn-primary">
+          Посмотреть карту маршрутов
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#how" class="btn btn-ghost">Как это работает</a>
+      </div>
+      <div class="data-strip">
+        <div class="data-strip-track">
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V2.5M7 11.5V13M1 7H2.5M11.5 7H13M3 3L4 4M11 11L10 10M3 11L4 10M11 3L10 4" stroke="#2BB6A3" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.5" stroke="#2BB6A3" stroke-width="1.4"/></svg> Освещённость улиц</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 12H1L7 1Z" stroke="#F3A53B" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 5.5V8" stroke="#F3A53B" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="10" r="0.6" fill="#F3A53B"/></svg> Статистика происшествий</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="7" rx="1.5" stroke="#2BB6A3" stroke-width="1.4"/><path d="M2 4.5L7 7.5L12 4.5" stroke="#2BB6A3" stroke-width="1.4"/></svg> Сообщения жителей</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12V6L7 2L12 6V12" stroke="#2BB6A3" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 12V8H9V12" stroke="#2BB6A3" stroke-width="1.4"/></svg> Качество тротуаров</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#F3A53B" stroke-width="1.4"/><circle cx="7" cy="7" r="1.4" fill="#F3A53B"/><path d="M7 1.5V2.5M7 11.5V12.5M1.5 7H2.5M11.5 7H12.5" stroke="#F3A53B" stroke-width="1.4" stroke-linecap="round"/></svg> Сигналы IoT-датчиков</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V2.5M7 11.5V13M1 7H2.5M11.5 7H13M3 3L4 4M11 11L10 10M3 11L4 10M11 3L10 4" stroke="#2BB6A3" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.5" stroke="#2BB6A3" stroke-width="1.4"/></svg> Освещённость улиц</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 12H1L7 1Z" stroke="#F3A53B" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 5.5V8" stroke="#F3A53B" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="10" r="0.6" fill="#F3A53B"/></svg> Статистика происшествий</div>
+          <div class="data-chip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="7" rx="1.5" stroke="#2BB6A3" stroke-width="1.4"/><path d="M2 4.5L7 7.5L12 4.5" stroke="#2BB6A3" stroke-width="1.4"/></svg> Сообщения жителей</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-card">
+      <div class="map-card-head">
+        <span>SenimPath · live-демо</span>
+        <span class="dot"><span></span> обновление маршрута</span>
+      </div>
+      <svg class="route-map" id="heroMap" viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg">
+        <g class="blocks">
+          <rect x="20" y="20" width="80" height="70" rx="6"/><rect x="116" y="20" width="80" height="70" rx="6"/><rect x="212" y="20" width="80" height="70" rx="6"/><rect x="308" y="20" width="80" height="70" rx="6"/><rect x="404" y="20" width="80" height="70" rx="6"/>
+          <rect x="20" y="106" width="80" height="70" rx="6"/><rect x="116" y="106" width="80" height="70" rx="6"/><rect x="212" y="106" width="80" height="70" rx="6"/><rect x="404" y="106" width="80" height="70" rx="6"/><rect x="500" y="106" width="80" height="70" rx="6"/>
+          <rect x="20" y="192" width="80" height="70" rx="6"/><rect x="116" y="192" width="80" height="70" rx="6"/><rect x="212" y="192" width="80" height="70" rx="6"/><rect x="308" y="192" width="80" height="70" rx="6"/><rect x="500" y="192" width="80" height="70" rx="6"/>
+          <rect x="20" y="278" width="80" height="70" rx="6"/><rect x="116" y="278" width="80" height="70" rx="6"/><rect x="212" y="278" width="80" height="70" rx="6"/><rect x="308" y="278" width="80" height="70" rx="6"/><rect x="404" y="278" width="80" height="70" rx="6"/><rect x="500" y="278" width="80" height="70" rx="6"/>
+          <rect x="116" y="364" width="80" height="70" rx="6"/><rect x="212" y="364" width="80" height="70" rx="6"/><rect x="500" y="364" width="80" height="70" rx="6"/>
+        </g>
+
+        <path id="heroFast" class="route-line fast" d="M12,434 L12,184 L300,184 L300,12 L588,12"/>
+        <path id="heroSafe" class="route-line safe hidden-route" d="M12,434 L396,434 L396,270 L492,270 L492,98 L588,98 L588,12"/>
+
+        <g class="marker-incident" id="heroIncidents"><path d="M12,290 L18,302 L6,302 Z"/><path d="M300,90 L306,102 L294,102 Z"/></g>
+        <g class="marker-lamp" id="heroLamps" style="display:none">
+          <circle cx="108" cy="434" r="4"/><circle cx="204" cy="434" r="4"/><circle cx="300" cy="434" r="4"/><circle cx="396" cy="352" r="4"/><circle cx="492" cy="184" r="4"/><circle cx="588" cy="55" r="4"/>
+        </g>
+        <g class="marker-cam" id="heroCams" style="display:none">
+          <rect x="392" y="430" width="8" height="8" rx="1.5"/><rect x="488" y="266" width="8" height="8" rx="1.5"/>
+        </g>
+
+        <g class="pin a"><circle cx="12" cy="434" r="6"/><text x="22" y="438">A · Школа</text></g>
+        <g class="pin b"><circle cx="588" cy="12" r="6"/><text x="540" y="6" text-anchor="end">B · Дом</text></g>
+      </svg>
+      <div class="map-legend">
+        <span><i class="legend-swatch" style="background:var(--coral-500)"></i> короткий маршрут</span>
+        <span><i class="legend-swatch" style="background:var(--teal-500)"></i> безопасный маршрут</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROBLEM ================= -->
+<section class="problem" id="problem">
+  <div class="container">
+    <div class="problem-grid">
+      <div class="reveal">
+        <div class="waypoint on-dark">WAYPOINT 01 · ПРОБЛЕМА</div>
+        <h2 style="font-size:clamp(28px,3.6vw,42px); margin-bottom:22px;">Короткий путь — не всегда безопасный</h2>
+        <div class="problem-copy">
+          <p>Каждый вечер тысячи школьников и студентов возвращаются домой по неосвещённым дворам и пустынным улицам. Обычные навигаторы строят маршрут по <strong>расстоянию</strong> — и не видят разницы между освещённым проспектом и тёмным переулком за гаражами.</p>
+          <p>Родители и преподаватели не имеют простого инструмента, чтобы оценить, насколько безопасен путь ребёнка от дома до школы или кампуса — и предложить более защищённую альтернативу.</p>
+          <p>SenimPath собирает данные, которые город уже накопил — и данные, которые могут собрать сами жители — чтобы превратить «короткий путь» в осознанный выбор.</p>
+        </div>
+        <div class="source-list">
+          <div class="source-item">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1V3M10 17V19M1 10H3M17 10H19M3.5 3.5L5 5M16.5 16.5L15 15M3.5 16.5L5 15M16.5 3.5L15 5" stroke="#2BB6A3" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="10" r="4" stroke="#2BB6A3" stroke-width="1.6"/></svg>
+            <div><h4>Карта освещённости</h4><p>Сведения об уличных фонарях и их состоянии — от городских служб и IoT-датчиков.</p></div>
+          </div>
+          <div class="source-item">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L19 18H1L10 1Z" stroke="#F3A53B" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 7.5V11.5" stroke="#F3A53B" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14.5" r="0.9" fill="#F3A53B"/></svg>
+            <div><h4>Открытые данные о происшествиях</h4><p>Обезличенная статистика инцидентов по районам — для расчёта индекса риска.</p></div>
+          </div>
+          <div class="source-item">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="11" rx="2" stroke="#2BB6A3" stroke-width="1.6"/><path d="M2 6L10 11L18 6" stroke="#2BB6A3" stroke-width="1.6"/></svg>
+            <div><h4>Сообщения жителей</h4><p>Сломанный фонарь, открытый люк, разбитый тротуар — добавляется на карту за секунды.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-panel reveal">
+        <div class="label">Пример индекса безопасности · 1 квартал, демо-режим</div>
+        <div class="demo-row">
+          <div class="name">Освещённость</div>
+          <div class="bar-wrap"><div class="bar-track"><div class="bar-fill green" style="width:88%"></div></div></div>
+          <div class="val">88%</div>
+        </div>
+        <div class="demo-row">
+          <div class="name">Активность пешеходов вечером</div>
+          <div class="bar-wrap"><div class="bar-track"><div class="bar-fill amber" style="width:54%"></div></div></div>
+          <div class="val">54%</div>
+        </div>
+        <div class="demo-row">
+          <div class="name">Сообщений об опасности за месяц</div>
+          <div class="bar-wrap"><div class="bar-track"><div class="bar-fill coral" style="width:23%"></div></div></div>
+          <div class="val">3</div>
+        </div>
+        <div class="demo-row">
+          <div class="name">Состояние тротуаров</div>
+          <div class="bar-wrap"><div class="bar-track"><div class="bar-fill green" style="width:76%"></div></div></div>
+          <div class="val">76%</div>
+        </div>
+        <div class="demo-row">
+          <div class="name">Итоговый индекс безопасности</div>
+          <div class="bar-wrap"><div class="bar-track"><div class="bar-fill green" style="width:81%"></div></div></div>
+          <div class="val">81%</div>
+        </div>
+        <div class="demo-foot">* Иллюстративный расчёт на демо-данных для одного квартала. После запуска пилота показатели рассчитываются по реальным данным города.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="waypoint">WAYPOINT 02 · КАК ЭТО РАБОТАЕТ</div>
+      <h2>От точки А до точки Б — но другим путём</h2>
+      <p>Четыре шага, чтобы пользователь получил не просто маршрут, а маршрут, в котором учтена его безопасность.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card reveal">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="15" stroke="#2BB6A3" stroke-width="2"/><circle cx="17" cy="17" r="3" fill="#2BB6A3"/><path d="M17 4V8M17 26V30M4 17H8M26 17H30" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="step-num">ШАГ 01</div>
+        <h3>Укажите путь</h3>
+        <p>Пользователь вводит точку отправления и пункт назначения — школу, дом, остановку или кампус.</p>
+      </div>
+      <div class="step-card reveal">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><rect x="4" y="4" width="26" height="26" rx="6" stroke="#2BB6A3" stroke-width="2"/><path d="M10 17H24M10 11H18M10 23H20" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="step-num">ШАГ 02</div>
+        <h3>Сбор данных по маршруту</h3>
+        <p>Сервис анализирует освещение, инфраструктуру, время суток, сообщения жителей и историю инцидентов на каждом отрезке пути.</p>
+      </div>
+      <div class="step-card reveal">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M5 27L13 12L20 20L29 6" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="12" r="2" fill="#2BB6A3"/><circle cx="20" cy="20" r="2" fill="#2BB6A3"/><circle cx="29" cy="6" r="2" fill="#2BB6A3"/></svg>
+        <div class="step-num">ШАГ 03</div>
+        <h3>Сравнение десятков вариантов</h3>
+        <p>Каждому отрезку улицы присваивается вес безопасности. Алгоритм находит путь с минимальным суммарным риском.</p>
+      </div>
+      <div class="step-card reveal">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M4 30L14 13L21 21L30 4" stroke="#F3A53B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/><path d="M4 30C10 28 18 22 30 4" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="step-num">ШАГ 04</div>
+        <h3>Готовый маршрут + альтернатива</h3>
+        <p>Пользователь получает безопасный маршрут, более быстрый вариант для сравнения и предупреждения о точках внимания.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAP DEMO ================= -->
+<section class="map-demo" id="map">
+  <div class="container">
+    <div class="map-demo-top">
+      <div class="section-head reveal" style="margin-bottom:0;">
+        <div class="waypoint">WAYPOINT 03 · КАРТА МАРШРУТОВ</div>
+        <h2>Один путь — два разных маршрута</h2>
+        <p>Постройте маршрут от подъезда до школы и переключитесь между «быстрым» и «безопасным» вариантом.</p>
+      </div>
+    </div>
+
+    <div class="route-form reveal" style="margin-bottom:30px;">
+      <div class="field">
+        <label>Откуда</label>
+        <input type="text" value="ул. Абая, 14" />
+      </div>
+      <div class="field">
+        <label>Куда</label>
+        <input type="text" value="Школа №25" />
+      </div>
+      <div class="field">
+        <label>Время</label>
+        <input type="text" value="19:30" />
+      </div>
+      <div class="toggle-group">
+        <button class="btn-small" id="btnSafe">Безопасный</button>
+        <button class="btn-small" id="btnFast">Быстрый</button>
+      </div>
+      <button class="btn btn-primary" id="btnBuild">
+        Построить маршрут
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="map-wrap reveal">
+      <div class="map-frame">
+        <svg class="route-map" id="demoMap" viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg">
+          <g class="blocks">
+            <rect x="20" y="20" width="80" height="70" rx="6"/><rect x="116" y="20" width="80" height="70" rx="6"/><rect x="212" y="20" width="80" height="70" rx="6"/><rect x="308" y="20" width="80" height="70" rx="6"/><rect x="404" y="20" width="80" height="70" rx="6"/>
+            <rect x="20" y="106" width="80" height="70" rx="6"/><rect x="116" y="106" width="80" height="70" rx="6"/><rect x="212" y="106" width="80" height="70" rx="6"/><rect x="404" y="106" width="80" height="70" rx="6"/><rect x="500" y="106" width="80" height="70" rx="6"/>
+            <rect x="20" y="192" width="80" height="70" rx="6"/><rect x="116" y="192" width="80" height="70" rx="6"/><rect x="212" y="192" width="80" height="70" rx="6"/><rect x="308" y="192" width="80" height="70" rx="6"/><rect x="500" y="192" width="80" height="70" rx="6"/>
+            <rect x="20" y="278" width="80" height="70" rx="6"/><rect x="116" y="278" width="80" height="70" rx="6"/><rect x="212" y="278" width="80" height="70" rx="6"/><rect x="308" y="278" width="80" height="70" rx="6"/><rect x="404" y="278" width="80" height="70" rx="6"/><rect x="500" y="278" width="80" height="70" rx="6"/>
+            <rect x="116" y="364" width="80" height="70" rx="6"/><rect x="212" y="364" width="80" height="70" rx="6"/><rect x="500" y="364" width="80" height="70" rx="6"/>
+          </g>
+
+          <path id="demoFast" class="route-line fast hidden-route" d="M12,434 L12,184 L300,184 L300,12 L588,12"/>
+          <path id="demoSafe" class="route-line safe" d="M12,434 L396,434 L396,270 L492,270 L492,98 L588,98 L588,12"/>
+
+          <g class="marker" data-title="Сообщение жителя" data-desc="Открытый канализационный люк. Добавлено 2 дня назад, статус: передано в акимат." data-type="incident" style="display:none">
+            <path d="M12,290 L19,303 L5,303 Z" fill="#E5594C"/>
+          </g>
+          <g class="marker" data-title="Точка внимания" data-desc="Тёмный переулок без освещения, зафиксированы происшествия в вечернее время." data-type="incident" style="display:none">
+            <path d="M300,90 L307,103 L293,103 Z" fill="#E5594C"/>
+          </g>
+
+          <g class="marker" data-title="Уличный фонарь · работает" data-desc="Светодиодный фонарь, подключён к системе мониторинга освещённости." data-type="lamp">
+            <circle cx="108" cy="434" r="5" fill="#F3A53B"/>
+          </g>
+          <g class="marker" data-title="Уличный фонарь · работает" data-desc="Освещённый пешеходный переход рядом с остановкой." data-type="lamp">
+            <circle cx="204" cy="434" r="5" fill="#F3A53B"/>
+          </g>
+          <g class="marker" data-title="Уличный фонарь · требует ремонта" data-desc="Жители сообщили о перегоревшей лампе. Заявка передана в акимат 3 дня назад." data-type="lamp">
+            <circle cx="300" cy="434" r="5" fill="#F3A53B"/>
+          </g>
+          <g class="marker" data-title="Уличный фонарь · работает" data-desc="Зона с хорошим освещением и активным пешеходным потоком." data-type="lamp">
+            <circle cx="396" cy="352" r="5" fill="#F3A53B"/>
+          </g>
+          <g class="marker" data-title="Уличный фонарь · работает" data-desc="Подход к остановке общественного транспорта, освещение в норме." data-type="lamp">
+            <circle cx="492" cy="184" r="5" fill="#F3A53B"/>
+          </g>
+          <g class="marker" data-title="Уличный фонарь · работает" data-desc="Финальный участок перед домом, индекс безопасности высокий." data-type="lamp">
+            <circle cx="588" cy="55" r="5" fill="#F3A53B"/>
+          </g>
+
+          <g class="marker" data-title="Камера видеонаблюдения" data-desc="Камера городской системы безопасности, обзор перекрёстка." data-type="cam">
+            <rect x="391" y="429" width="10" height="10" rx="2" fill="#9FB8C9"/>
+          </g>
+          <g class="marker" data-title="Камера видеонаблюдения" data-desc="Камера у входа в школу, прямая видимость на маршрут." data-type="cam">
+            <rect x="487" y="265" width="10" height="10" rx="2" fill="#9FB8C9"/>
+          </g>
+
+          <g class="pin a"><circle cx="12" cy="434" r="6"/><text x="22" y="438">A · Дом</text></g>
+          <g class="pin b"><circle cx="588" cy="12" r="6"/><text x="540" y="6" text-anchor="end">B · Школа</text></g>
+        </svg>
+        <div class="map-legend">
+          <span><i class="legend-swatch" style="background:var(--teal-500)"></i> безопасный участок</span>
+          <span><i class="legend-swatch" style="background:var(--amber-500)"></i> умеренный риск</span>
+          <span><i class="legend-swatch" style="background:var(--coral-500)"></i> высокий риск</span>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <h4 id="infoTitle">Метки на карте</h4>
+        <div id="infoEmpty" class="info-empty">Нажмите на любую метку карты — фонарь, камеру или сообщение жителя — чтобы увидеть подробности.</div>
+        <div id="infoCard" class="info-card" style="display:none">
+          <svg id="infoIcon" width="22" height="22" viewBox="0 0 22 22" fill="none"></svg>
+          <div><div class="t" id="infoCardTitle"></div><div class="d" id="infoCardDesc"></div></div>
+        </div>
+        <div style="margin-top:auto; border-top:1px solid var(--line); padding-top:16px;">
+          <h4 style="margin-bottom:10px;">Сейчас выбран маршрут</h4>
+          <p id="routeSummary" style="font-size:14.5px; color:var(--ink-600);">Безопасный — длиннее на 5 минут, но 96% пути освещено и проходит мимо камер видеонаблюдения.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANALYTICS ================= -->
+<section class="analytics">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="waypoint">WAYPOINT 04 · АНАЛИТИКА МАРШРУТА</div>
+      <h2>Цифры за каждым маршрутом</h2>
+      <p>Каждый построенный путь сопровождается понятной аналитикой — чтобы пользователь видел, чем он платит за скорость или безопасность.</p>
+    </div>
+    <div class="analytics-grid reveal">
+      <div class="stat-card active-good">
+        <div class="num" id="statIndex">91%</div>
+        <div class="label">Индекс безопасности маршрута</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="statLit">96%</div>
+        <div class="label">Маршрут освещён</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="statRisk">1</div>
+        <div class="label">Точка повышенного внимания</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="statTime">14 мин</div>
+        <div class="label">Время в пути</div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-row">
+          <div class="ctitle">Быстрый маршрут</div>
+          <div class="ctrack"><div class="cfill fast" style="width:54%"></div></div>
+          <div class="cval">9 мин · 54%</div>
+        </div>
+        <div class="compare-row">
+          <div class="ctitle">Безопасный маршрут</div>
+          <div class="ctrack"><div class="cfill safe" style="width:91%"></div></div>
+          <div class="cval">14 мин · 91%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="waypoint">WAYPOINT 05 · ВОЗМОЖНОСТИ ПЛАТФОРМЫ</div>
+      <h2>Не только маршрут</h2>
+      <p>SenimPath объединяет навигацию, обратную связь от жителей и инструменты для родителей, школ и городских служб.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L18 5V11C18 15 15 18 11 20C7 18 4 15 4 11V5L11 2Z" stroke="#2BB6A3" stroke-width="1.7" stroke-linejoin="round"/><path d="M11 8V12M11 15H11.01" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <h4>Тревожная кнопка</h4>
+        <p>При отклонении от безопасного маршрута геолокация мгновенно отправляется родителям или доверенным людям.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="#2BB6A3" stroke-width="1.7" stroke-dasharray="3 3"/><circle cx="11" cy="11" r="2.5" fill="#2BB6A3"/></svg></div>
+        <h4>Геозоны для родителей</h4>
+        <p>Родители задают границы привычного маршрута — уведомление приходит, если ребёнок вышел за их пределы.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2" stroke="#2BB6A3" stroke-width="1.7"/><path d="M3 8L11 13L19 8" stroke="#2BB6A3" stroke-width="1.7"/></svg></div>
+        <h4>Сообщить об опасности</h4>
+        <p>Сломанный фонарь или яма на тротуаре — отметка появляется на общей карте сразу после отправки.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18L9 8L13 13L18 4" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="8" r="1.6" fill="#2BB6A3"/><circle cx="13" cy="13" r="1.6" fill="#2BB6A3"/><circle cx="18" cy="4" r="1.6" fill="#2BB6A3"/></svg></div>
+        <h4>Геймификация для детей</h4>
+        <p>Баллы и значки за выбор безопасного пути — мягкая мотивация без давления и нравоучений.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="6" r="3" stroke="#2BB6A3" stroke-width="1.7"/><path d="M4 19C4 15 7 13 11 13C15 13 18 15 18 19" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round"/><path d="M14 19C14 16 16 14 19 14" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round"/><circle cx="19" cy="10" r="2" stroke="#2BB6A3" stroke-width="1.7"/></svg></div>
+        <h4>Доступная среда</h4>
+        <p>Отдельный слой данных: пандусы, ширина тротуаров и маршруты, удобные для людей с инвалидностью.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="9" width="16" height="9" rx="2" stroke="#2BB6A3" stroke-width="1.7"/><path d="M7 9V6C7 4.3 8.3 3 10 3H12C13.7 3 15 4.3 15 6V9" stroke="#2BB6A3" stroke-width="1.7"/></svg></div>
+        <h4>Privacy-first</h4>
+        <p>Модели обучаются на агрегированных данных без сбора персональной истории перемещений пользователей.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="11" rx="2" stroke="#2BB6A3" stroke-width="1.7"/><path d="M3 17H19" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="9" r="1.4" fill="#2BB6A3"/><circle cx="13" cy="9" r="1.4" fill="#2BB6A3"/></svg></div>
+        <h4>Маршрут до транспорта</h4>
+        <p>Путь «от двери до двери» с акцентом на освещённость и безопасность подходов к остановкам.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2C6 2 2 6 2 11C2 16 6 20 11 20C16 20 20 16 20 11" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round"/><path d="M11 6V11L14 14" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 4L20 4L20 7" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Прогноз по времени суток</h4>
+        <p>Один и тот же маршрут оценивается по-разному утром, днём и вечером — карта меняется вместе с городом.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REPORT ================= -->
+<section class="report" id="report">
+  <div class="container">
+    <div class="report-grid">
+      <div class="reveal">
+        <div class="waypoint">WAYPOINT 06 · СООБЩИТЬ ОБ ОПАСНОСТИ</div>
+        <h2>Карта живёт благодаря жителям</h2>
+        <p>Каждое сообщение мгновенно обновляет карту безопасности — для вас и для всех, кто пойдёт этим маршрутом после.</p>
+        <div class="report-points">
+          <div class="report-point">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 5" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>Отметка появляется на карте сразу после отправки и видна всем пользователям рядом.</div>
+          </div>
+          <div class="report-point">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 5" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>Заявки с фотографиями автоматически группируются в отчёт для городских служб.</div>
+          </div>
+          <div class="report-point">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 5" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>Чем больше отметок устранено — тем выше индекс безопасности района.</div>
+          </div>
+        </div>
+      </div>
+
+      <form class="report-form reveal" id="reportForm">
+        <div class="field">
+          <label>Тип проблемы</label>
+          <select>
+            <option>Неработающий фонарь</option>
+            <option>Открытый люк / повреждение дороги</option>
+            <option>Подозрительная активность</option>
+            <option>Отсутствие тротуара</option>
+            <option>Другое</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Описание</label>
+          <textarea rows="3" placeholder="Например: не горит фонарь у перехода на ул. Сатпаева"></textarea>
+        </div>
+        <div class="field">
+          <label>Местоположение</label>
+          <input type="text" placeholder="Укажите адрес или выберите точку на карте" value="ул. Сатпаева, 21" />
+        </div>
+        <button type="button" class="attach-btn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 5.5L6.5 10C5.4 11.1 5.4 12.9 6.5 14C7.6 15.1 9.4 15.1 10.5 14L14 10.5C15.4 9.1 15.4 6.9 14 5.5C12.6 4.1 10.4 4.1 9 5.5L4.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Прикрепить фото
+        </button>
+        <button type="submit" class="btn btn-primary" style="justify-content:center;">Отправить на карту</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#2BB6A3" stroke-width="1.7"/><path d="M6 10L9 13L14 7" stroke="#2BB6A3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>Спасибо! Точка добавлена на карту и видна другим жителям.</span>
+</div>
+
+<!-- ================= CITY ================= -->
+<section class="city" id="city">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="waypoint on-dark">WAYPOINT 07 · ДЛЯ ГОРОДСКИХ ВЛАСТЕЙ</div>
+      <h2>От карты — к конкретным решениям</h2>
+      <p>Акимату не нужно гадать, где не хватает фонарей. SenimPath показывает это на карте и считает эффект от изменений.</p>
+    </div>
+    <div class="city-grid reveal">
+      <div class="heatmap-card">
+        <div class="heatmap-head">
+          <span>Карта горячих точек · квартал «Север-3»</span>
+          <span>обновлено сегодня</span>
+        </div>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="heatmap-legend">
+          <span><i style="background:var(--teal-500)"></i> низкий риск</span>
+          <span><i style="background:var(--amber-500)"></i> средний риск</span>
+          <span><i style="background:var(--coral-500)"></i> высокий риск</span>
+        </div>
+        <div class="heatmap-note" id="heatmapNote">Нажмите на ячейку, чтобы увидеть рекомендацию для этого участка.</div>
+        <div class="city-stats">
+          <div class="city-stat"><div class="num">214</div><div class="label">сообщений за месяц</div></div>
+          <div class="city-stat"><div class="num">37</div><div class="label">точек устранено</div></div>
+          <div class="city-stat"><div class="num">+18%</div><div class="label">к индексу района</div></div>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="font-size:13px; text-transform:uppercase; letter-spacing:.1em; font-family:'JetBrains Mono',monospace; color:rgba(255,255,255,0.5); margin-bottom:18px;">Рекомендации для акимата</h4>
+        <div class="reco-list">
+          <div class="reco-item">
+            <span class="tag">+18%</span>
+            <p>Установить освещение на ул. Жандосова между домами 12 и 18 — повысит индекс безопасности квартала на 18%.</p>
+          </div>
+          <div class="reco-item">
+            <span class="tag">+11%</span>
+            <p>Добавить камеру видеонаблюдения у пешеходного перехода рядом со школой №25 — снизит число тёмных слепых зон.</p>
+          </div>
+          <div class="reco-item">
+            <span class="tag">+9%</span>
+            <p>Восстановить тротуар вдоль ул. Сатпаева — сейчас пешеходы выходят на проезжую часть.</p>
+          </div>
+          <div class="reco-item">
+            <span class="tag">+6%</span>
+            <p>Синхронизировать фазы светофора у остановки «Парк» — снизит время ожидания на переходе в часы пик.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ROADMAP / IMPACT ================= -->
+<section class="roadmap">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="waypoint">WAYPOINT 08 · МАСШТАБИРОВАНИЕ И ЭФФЕКТ</div>
+      <h2>От одного кампуса — к городу</h2>
+      <p>Путь внедрения построен так же, как маршрут SenimPath: шаг за шагом, без лишнего риска.</p>
+    </div>
+    <div class="roadmap-track reveal">
+      <div class="roadmap-item">
+        <div class="roadmap-dot">01</div>
+        <h4>Пилот на кампусе</h4>
+        <p>Сбор данных об освещении и инфраструктуре вокруг университета, первые маршруты для студентов.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">02</div>
+        <h4>Район города</h4>
+        <p>Подключение школ, родителей и районной администрации. Запуск краудсорсинга и тревожной кнопки.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">03</div>
+        <h4>Город</h4>
+        <p>Полная карта городских данных, дашборд для акимата, отчёты о приоритетных зонах.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">04</div>
+        <h4>Регионы Казахстана</h4>
+        <p>Адаптация модели под другие города — данные локальные, алгоритм общий.</p>
+      </div>
+    </div>
+
+    <div class="impact-grid">
+      <div class="impact-card reveal">
+        <span class="tag">Количественный эффект</span>
+        <h3>Меньше инцидентов на маршруте</h3>
+        <p>Снижение числа происшествий на маршрутах пользователей за первый год тестирования — за счёт выбора более безопасных путей и быстрого устранения опасных точек.</p>
+      </div>
+      <div class="impact-card reveal">
+        <span class="tag">Качественный эффект</span>
+        <h3>Чувство защищённости</h3>
+        <p>Рост доверия студентов, школьников и родителей к городской среде — и к тому, что сигналы жителей действительно приводят к изменениям.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="final-cta" id="contacts">
+  <div class="container final-cta-inner reveal">
+    <div class="waypoint on-dark" style="justify-content:center;">WAYPOINT 09 · СВЯЗАТЬСЯ</div>
+    <h2>Готовы протестировать SenimPath в своём городе?</h2>
+    <p>Мы открыты к партнёрству с университетами, школами и городскими администрациями — начнём с одного маршрута, который меняет ощущение целого района.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Написать команде проекта</a>
+      <a href="#map" class="btn btn-ghost">Вернуться к карте</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="logo">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="13" stroke="#2BB6A3" stroke-width="2"/>
+            <path d="M8 18L12 11L16 15L20 8" stroke="#2BB6A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20" cy="8" r="2" fill="#2BB6A3"/>
+          </svg>
+          SenimPath
+        </a>
+        <p>AI-сервис безопасных пешеходных маршрутов для детей и студентов. Проект подготовлен для конкурса социальных проектов SIA Kazakhstan.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>Платформа</h5>
+          <a href="#problem">Проблема</a>
+          <a href="#how">Как это работает</a>
+          <a href="#map">Карта маршрутов</a>
+          <a href="#features">Возможности</a>
+        </div>
+        <div class="footer-col">
+          <h5>Участникам</h5>
+          <a href="#report">Сообщить об опасности</a>
+          <a href="#city">Для городских властей</a>
+          <a href="#contacts">Связаться</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SenimPath. Проект-концепт для презентации.</span>
+      <span class="badge">SIA KAZAKHSTAN · SOCIAL PROJECTS 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---------- Mobile nav ----------
+  document.getElementById('navToggle').addEventListener('click', function(){
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.addEventListener('click', ()=> document.getElementById('navLinks').classList.remove('open'));
+  });
+
+  // ---------- Reveal on scroll ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el=> io.observe(el));
+
+  // ---------- Hero map auto-toggle ----------
+  const heroFast = document.getElementById('heroFast');
+  const heroSafe = document.getElementById('heroSafe');
+  const heroLamps = document.getElementById('heroLamps');
+  const heroCams = document.getElementById('heroCams');
+  const heroIncidents = document.getElementById('heroIncidents');
+  let heroState = 'fast';
+  function setHero(state){
+    if(state==='safe'){
+      heroFast.classList.add('hidden-route');
+      heroSafe.classList.remove('hidden-route');
+      heroLamps.style.display='block';
+      heroCams.style.display='block';
+      heroIncidents.style.display='none';
+    } else {
+      heroSafe.classList.add('hidden-route');
+      heroFast.classList.remove('hidden-route');
+      heroLamps.style.display='none';
+      heroCams.style.display='none';
+      heroIncidents.style.display='block';
+    }
+    heroState = state;
+  }
+  setHero('fast');
+  setInterval(()=> setHero(heroState==='fast' ? 'safe' : 'fast'), 4200);
+
+  // ---------- Demo map toggle ----------
+  const demoFast = document.getElementById('demoFast');
+  const demoSafe = document.getElementById('demoSafe');
+  const demoMap = document.getElementById('demoMap');
+  const btnSafe = document.getElementById('btnSafe');
+  const btnFast = document.getElementById('btnFast');
+  const btnBuild = document.getElementById('btnBuild');
+  const routeSummary = document.getElementById('routeSummary');
+
+  const stats = {
+    safe:{index:'91%', lit:'96%', risk:'1', time:'14 мин', summary:'Безопасный — длиннее на 5 минут, но 96% пути освещено и проходит мимо камер видеонаблюдения.'},
+    fast:{index:'54%', lit:'48%', risk:'3', time:'9 мин', summary:'Быстрый — короче на 5 минут, но проходит через неосвещённый переулок с зафиксированными происшествиями.'}
+  };
+  const cfillFast = document.querySelector('.cfill.fast');
+  const cfillSafe = document.querySelector('.cfill.safe');
+
+  function applyMode(mode){
+    const lamps = demoMap.querySelectorAll('[data-type="lamp"], [data-type="cam"]');
+    const incidents = demoMap.querySelectorAll('[data-type="incident"]');
+    if(mode==='safe'){
+      demoFast.classList.add('hidden-route');
+      demoSafe.classList.remove('hidden-route');
+      lamps.forEach(el=> el.style.display='block');
+      incidents.forEach(el=> el.style.display='none');
+      btnSafe.classList.add('active'); btnFast.classList.remove('active');
+    } else {
+      demoSafe.classList.add('hidden-route');
+      demoFast.classList.remove('hidden-route');
+      lamps.forEach(el=> el.style.display='none');
+      incidents.forEach(el=> el.style.display='block');
+      btnFast.classList.add('active'); btnSafe.classList.remove('active');
+    }
+    const s = stats[mode];
+    document.getElementById('statIndex').textContent = s.index;
+    document.getElementById('statLit').textContent = s.lit;
+    document.getElementById('statRisk').textContent = s.risk;
+    document.getElementById('statTime').textContent = s.time;
+    document.querySelector('.stat-card').classList.toggle('active-good', mode==='safe');
+    routeSummary.textContent = s.summary;
+  }
+  applyMode('safe');
+  btnSafe.addEventListener('click', ()=> applyMode('safe'));
+  btnFast.addEventListener('click', ()=> applyMode('fast'));
+  btnBuild.addEventListener('click', ()=>{
+    const current = demoSafe.classList.contains('hidden-route') ? 'fast' : 'safe';
+    applyMode(current);
+  });
+
+  // ---------- Marker tooltips ----------
+  const infoEmpty = document.getElementById('infoEmpty');
+  const infoCard = document.getElementById('infoCard');
+  const infoCardTitle = document.getElementById('infoCardTitle');
+  const infoCardDesc = document.getElementById('infoCardDesc');
+  const infoIcon = document.getElementById('infoIcon');
+
+  const icons = {
+    lamp:'<circle cx="11" cy="11" r="8" stroke="#F3A53B" stroke-width="1.7"/><path d="M11 4V6M11 16V18M4 11H6M16 11H18" stroke="#F3A53B" stroke-width="1.7" stroke-linecap="round"/>',
+    cam:'<rect x="3" y="6" width="16" height="11" rx="2" stroke="#9FB8C9" stroke-width="1.7"/><path d="M8 6V4C8 2.9 8.9 2 10 2H12C13.1 2 14 2.9 14 4V6" stroke="#9FB8C9" stroke-width="1.7"/>',
+    incident:'<path d="M11 2L20 18H2L11 2Z" stroke="#E5594C" stroke-width="1.7" stroke-linejoin="round"/><path d="M11 9V12" stroke="#E5594C" stroke-width="1.7" stroke-linecap="round"/><circle cx="11" cy="15" r="0.9" fill="#E5594C"/>'
+  };
+
+  demoMap.querySelectorAll('.marker').forEach(marker=>{
+    marker.addEventListener('click', ()=>{
+      infoEmpty.style.display='none';
+      infoCard.style.display='flex';
+      infoCardTitle.textContent = marker.getAttribute('data-title');
+      infoCardDesc.textContent = marker.getAttribute('data-desc');
+      infoIcon.innerHTML = icons[marker.getAttribute('data-type')] || '';
+    });
+  });
+
+  // ---------- Report form submit ----------
+  const reportForm = document.getElementById('reportForm');
+  const toast = document.getElementById('toast');
+  reportForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 3600);
+  });
+
+  // ---------- City heatmap ----------
+  const heatmap = document.getElementById('heatmap');
+  const heatmapNote = document.getElementById('heatmapNote');
+  const cellNotes = [
+    'Хорошо освещённый участок, дополнительных мер не требуется.',
+    'Средний риск: рекомендуется проверить состояние тротуара.',
+    'Высокий риск: установить освещение — приоритет №1 по заявкам жителей.',
+    'Камера видеонаблюдения покрывает участок — риск снижен.',
+    'Зафиксировано 3 сообщения за месяц: тёмный двор между домами.',
+    'Хорошая видимость, активный пешеходный поток в вечернее время.'
+  ];
+  const colors = ['#2BB6A3','#3FCBB7','#F3A53B','#F0C26E','#E5594C','#EE8479'];
+  for(let i=0;i<60;i++){
+    const cell = document.createElement('div');
+    cell.className='cell';
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    cell.style.background = c;
+    cell.style.opacity = (0.55 + Math.random()*0.45).toFixed(2);
+    cell.addEventListener('click', ()=>{
+      heatmapNote.textContent = cellNotes[Math.floor(Math.random()*cellNotes.length)];
+    });
+    heatmap.appendChild(cell);
+  }
+</script>
+</body>
+</html>
